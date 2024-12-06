@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .order-summary img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 15px;
+        }
+
+        .order-summary {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .order-summary .product-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .order-summary .product-details h5 {
+            margin-bottom: 5px;
+        }
+
+        .total-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .card-footer {
+            background-color: transparent;
+            border-top: 0;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="home.html">Fashion Store</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="home.html">HOME</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cart.html">CART</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Success Message -->
+    <div class="container mt-5 text-center">
+        <h3>Thank You for Your Order!</h3>
+        <p>Your order has been successfully placed. You will receive a confirmation email shortly.</p>
+        <a href="home.html" class="btn btn-primary">Return to Home</a>
+    </div>
+
+    <!-- Order Details Section -->
+    <div class="container mt-5">
+        <h4>Order Details</h4>
+        <div id="orderSuccessDetails" class="order-summary">
+            <!-- Order items will be dynamically added here -->
+        </div>
+        <div class="total-amount">
+            <h5>Total Amount: $<span id="orderTotalAmount">0.00</span></h5>
+        </div>
+    </div>
+
+    <!-- Shipping Information Section -->
+    <div class="container mt-5">
+        <h4>Shipping Information</h4>
+        <div class="card">
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item"><strong>Name:</strong> <span id="shippingName"></span></div>
+                    <div class="list-group-item"><strong>Phone:</strong> <span id="shippingPhone"></span></div>
+                    <div class="list-group-item"><strong>Email:</strong> <span id="shippingEmail"></span></div>
+                    <div class="list-group-item"><strong>Address:</strong> <span id="shippingAddress"></span></div>
+                    <div class="list-group-item"><strong>Order Notes:</strong> <span id="shippingNotes"></span></div>
+                    <div class="list-group-item"><strong>Payment Method:</strong> <span id="paymentMethod"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p>&copy; 2024 Fashion Store - All rights reserved</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+
+    <script>
+        // Display the order details and shipping information on the success page
+        function displayOrderSuccess() {
+            const order = JSON.parse(localStorage.getItem('order'));
+
+            if (order) {
+                const cart = order.cart;
+                const shippingInfo = order.shippingInfo;
+
+                // Display order details
+                const orderDetails = document.getElementById('orderSuccessDetails');
+                const orderTotalAmount = document.getElementById('orderTotalAmount');
+                let totalAmount = 0;
+                orderDetails.innerHTML = '';
+
+                if (cart.length === 0) {
+                    orderDetails.innerHTML = '<div class="text-center">No items in your order.</div>';
+                } else {
+                    cart.forEach(item => {
+                        const row = `
+                            <div class="order-summary">
+                                <img src="${item.img}" alt="${item.name}">
+                                <div class="product-details">
+                                    <h5>${item.name}</h5>
+                                    <p>Quantity: ${item.quantity}</p>
+                                    <p>Price: $${item.price.toFixed(2)}</p>
+                                    <p>Total: $${(item.price * item.quantity).toFixed(2)}</p>
+                                </div>
+                            </div>
+                        `;
+                        orderDetails.innerHTML += row;
+                        totalAmount += item.price * item.quantity;
+                    });
+                }
+
+                orderTotalAmount.innerText = totalAmount.toFixed(2);
+
+                // Display shipping information
+                document.getElementById('shippingName').innerText = shippingInfo.name;
+                document.getElementById('shippingPhone').innerText = shippingInfo.phone;
+                document.getElementById('shippingEmail').innerText = shippingInfo.email;
+                document.getElementById('shippingAddress').innerText = shippingInfo.address;
+                document.getElementById('shippingNotes').innerText = shippingInfo.notes || 'N/A';
+                document.getElementById('paymentMethod').innerText = shippingInfo.paymentMethod;
+            }
+        }
+
+        // Call the function to display order details and shipping info
+        displayOrderSuccess();
+
+
+        function saveOrderHistory() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];  // Giỏ hàng hiện tại
+    const totalAmount = cart.reduce((total, product) => total + (product.price * (product.quantity || 1)), 0);  // Tổng tiền đơn hàng
+
+    const orderId = new Date().getTime();  // Tạo ID cho đơn hàng
+
+    const orderData = {
+        id: orderId,
+        date: new Date().toISOString(),
+        total: totalAmount,
+        items: cart  // Lưu giỏ hàng vào đơn hàng
+    };
+
+    let orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];  // Lấy lịch sử đơn hàng
+
+    orderHistory.push(orderData);  // Thêm đơn hàng mới vào lịch sử
+
+    // Lưu lại vào localStorage
+    localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+
+    // Xóa giỏ hàng sau khi đặt
+    localStorage.removeItem('cart');
+}
+
+// Gọi hàm này khi người dùng đã thanh toán thành công trên trang order_success.html
+saveOrderHistory();
+
+// Hiển thị lịch sử đơn hàng trong modal
+function showOrderHistory() {
+    const orderHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
+    const orderHistoryList = document.getElementById('orderHistoryList');
+    
+    console.log("Order History from localStorage:", orderHistory); // Debug log để kiểm tra dữ liệu
+
+    if (orderHistory.length === 0) {
+        orderHistoryList.innerHTML = '<p>No orders yet.</p>';
+    } else {
+        orderHistoryList.innerHTML = '';  // Xóa nội dung cũ
+        orderHistory.forEach(order => {
+            const orderItem = `
+                <div class="order-item">
+                    <h6>Order Date: ${order.date}</h6>
+                    <ul>
+                        ${order.items.map(item => `
+                            <li>${item.name} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}</li>
+                        `).join('')}
+                    </ul>
+                    <strong>Total: $${order.total.toFixed(2)}</strong>
+                </div>
+                <hr>
+            `;
+            orderHistoryList.innerHTML += orderItem;
+        });
+    }
+}
+
+// Khi nhấn nút, hiển thị lịch sử đơn hàng trong modal
+document.getElementById('viewOrderHistoryBtn').addEventListener('click', function() {
+    showOrderHistory();
+    new bootstrap.Modal(document.getElementById('orderHistoryModal')).show();
+});
+</script>
+</body>
+
+</html>
+
+
+
+
